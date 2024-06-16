@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_filex/flutter_filex.dart';
 import 'package:image/image.dart' as x;
+import 'package:imagen/font/regular_100.dart';
 
 void main() {
   runApp(MyApp());
@@ -53,21 +54,19 @@ class MyApp extends StatelessWidget {
   }
 
   Future<Uint8List> _loadAndResizeImage() async {
-    ByteData imageData = await rootBundle.load('assets/images/a4.jpg');
-    Uint8List imageBytes = imageData.buffer.asUint8List();
-    x.Image image = x.decodeImage(imageBytes)!;
-    // x.Image resizedImage = x.copyResize(image, width: A4_WIDTH_PX, height: A4_HEIGHT_PX);
+    ByteData background = await rootBundle.load('assets/images/a4.jpg');
+    Uint8List backgroundBytes = background.buffer.asUint8List();
+    x.Image image = x.decodeImage(backgroundBytes)!;
 
     x.drawString(
       image,
-      'Your Text Here',
-      font: x.arial48,
-      x: 100,
-      y: 100,
+      'MOCKRAWIT MITRAWOKKIYOTHINSAWONG',
+      font: regular100,
       wrap: true,
       color: x.ColorFloat32.rgb(0, 0, 0),
     );
 
+    // x.Image resizedImage = x.copyResize(image, width: A4_WIDTH_PX, height: A4_HEIGHT_PX);
     List<int> encodeImage = x.encodeJpg(image);
     return Uint8List.fromList(encodeImage);
   }
