@@ -1,17 +1,26 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_filex/flutter_filex.dart';
 import 'package:image/image.dart' as x;
 import 'package:imagen/font/regular_100.dart';
+import 'package:imagen/paint/certificate_custom_painter.dart';
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  Future<ui.Image> _loadImage(String imageAssetPath) async {
+    final data = (await rootBundle.load(imageAssetPath));
+    final bytes = data.buffer.asUint8List();
+    return await decodeImageFromList(bytes);
+  }
+
+  final recorder = ui.PictureRecorder();
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,32 +31,49 @@ class MyApp extends StatelessWidget {
         ),
         body: Container(
           margin: const EdgeInsets.all(16),
-          child: FutureBuilder<Uint8List>(
-            future: _loadAndResizeImage(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                final image = snapshot.data!;
-                return Column(
-                  children: [
-                    Expanded(child: Image.memory(image)),
-                    TextButton(
-                      onPressed: () async {
-                        _processSave(image);
-                      },
-                      child: const Text(
-                        'Save',
-                        style: TextStyle(color: Colors.white),
+          child: Builder(builder: (context) {
+            return FutureBuilder<ui.Image>(
+                future: _loadImage('assets/images/a4.jpg'),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return FittedBox(
+                      child: CustomPaint(
+                        painter: CertificateCustomPainter(
+                          snapshot.data!,
+                        ),
+                        size: const ui.Size(2480, 3508),
                       ),
-                    ),
-                  ],
-                );
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                return const CircularProgressIndicator();
-              }
-            },
-          ),
+                    );
+                  }
+                  return const CircularProgressIndicator();
+                });
+            return FutureBuilder<Uint8List>(
+              future: _loadAndResizeImage(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final image = snapshot.data!;
+                  return Column(
+                    children: [
+                      Expanded(child: Image.memory(image)),
+                      TextButton(
+                        onPressed: () async {
+                          _processSave(image);
+                        },
+                        child: const Text(
+                          'Save',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  return const CircularProgressIndicator();
+                }
+              },
+            );
+          }),
         ),
       ),
     );
